@@ -87,24 +87,48 @@ public class StudentManagement {
     }
 
     
-    public void sortByName() {
-        sortAndDisplay(repository.getAllStudents(), Comparator.comparing(p -> p.getFullName().toLowerCase()), false);
+   public void sortByName() {
+    List<Person> students = repository.getAllStudents();
+    if (checkListEmpty(students)) return;
+    quickSort(students, 0, students.size() - 1, Comparator.comparing(p -> p.getFullName().toLowerCase()));
+    for (Person student : students) {
+        student.displayInfo();
     }
-    
-    public void sortByAverageMark() {
-        sortAndDisplay(repository.getAllStudents(), Comparator.comparing(p -> ((Major)p).calculateAverageMark()), true);
+}
+
+public void sortByAverageMark() {
+    List<Person> students = repository.getAllStudents();
+    if (checkListEmpty(students)) return;
+    quickSort(students, 0, students.size() - 1, Comparator.comparing(p -> ((Major) p).calculateAverageMark()));
+    for (Person student : students) {
+        displayStudentWithRanking(student);
     }
-    
-    private void sortAndDisplay(List<Person> list, Comparator<Person> comparator, boolean withRanking) {
-        if (checkListEmpty(list)) return;
-        list.sort(comparator);
-        for (Person student : list) {
-            if (withRanking)
-                displayStudentWithRanking(student);
-            else
-                student.displayInfo();
+}
+
+// Generic Quick Sort function for a list of Person
+private void quickSort(List<Person> list, int low, int high, Comparator<Person> comparator) {
+    if (low < high) {
+        int pi = partition(list, low, high, comparator);
+        quickSort(list, low, pi - 1, comparator);
+        quickSort(list, pi + 1, high, comparator);
+    }
+}
+
+private int partition(List<Person> list, int low, int high, Comparator<Person> comparator) {
+    Person pivot = list.get(high);
+    int i = low - 1;
+
+    for (int j = low; j < high; j++) {
+        if (comparator.compare(list.get(j), pivot) <= 0) {
+            i++;
+            Collections.swap(list, i, j);
         }
     }
+
+    Collections.swap(list, i + 1, high);
+    return i + 1;
+}
+
     
     public void updateStudent(String studentId, Scanner sc) {
         Person toUpdate = repository.getStudent(studentId);
